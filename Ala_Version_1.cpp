@@ -136,10 +136,12 @@ void LatticeBoltzmann::Inicie(double rho0, double Jx0, double Jy0){
   
   for(ix=0;ix<Lx;ix++)
     for(iy=0;iy<Ly;iy++){
-      
-      MporF[i]=0;
-      for(j=0;j<Q;j++)
-	MporF[i]+=M[i][j]*f[ix][iy][j];
+
+      for(i=0;i<Q;i++){
+	MporF[i]=0;
+	for(j=0;j<Q;j++)
+	  MporF[i]+=M[i][j]*f[ix][iy][j];
+      }
       
       for(i=0;i<Q;i++){
 	f[ix][iy][i]=fequilibrio(i,rho0,Jx0,Jy0);
@@ -193,10 +195,12 @@ void LatticeBoltzmann::Adveccione(void){ //de fnew a f
   
   for(ix=0;ix<Lx;ix++)
     for(iy=0;iy<Ly;iy++){
-      
-      M1porDeltazeta[i]=0;
-      for(j=0;j<Q;j++)
-	M1porDeltazeta[i]+=M1[i][j]*deltazeta[ix][iy][j];
+
+      for(i=0;i<Q;i++){
+	M1porDeltazeta[i]=0;
+	for(j=0;j<Q;j++)
+	  M1porDeltazeta[i]+=M1[i][j]*deltazeta[ix][iy][j];
+      }
       
       for(i=0;i<Q;i++)
   	f[(ix+V[0][i]+Lx)%Lx][(iy+V[1][i]+Ly)%Ly][i]=f[ix][iy][i]+M1porDeltazeta[i];
@@ -231,7 +235,7 @@ int main(void){
   //Corra
   for(t=0;t<tmax;t++){
     Ala.Colisione(t);
-    Ala.Adveccione();
+    //Ala.Adveccione();
   }
   
   Ala.Imprimase("Ala.dat", t);
