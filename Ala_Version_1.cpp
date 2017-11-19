@@ -124,7 +124,7 @@ double LatticeBoltzmann::zetaequilibrio(int i, double rho0, double Jx0, double J
 void LatticeBoltzmann::Inicie(double rho0, double Jx0, double Jy0){
   int ix,iy,i,j;
 
-  int M[Q][Q]={  { 1,  1, 1, 1,  1, 1, 1, 1, 1},
+  /*int M[Q][Q]={  { 1,  1, 1, 1,  1, 1, 1, 1, 1},   //version presentacion
 		 { 0,  1, 1, 0, -1,-1,-1, 0, 1},
 		 { 0,  0, 1, 1,  1, 0,-1,-1, -1},
 		 { 0, -2, 1, 0,  1, 2,-1, 0, 1},
@@ -132,7 +132,17 @@ void LatticeBoltzmann::Inicie(double rho0, double Jx0, double Jy0){
 		 { 4, -2, 1,-2,  1,-2, 1,-2, 1},
 		 {-4, -1, 2,-1,  2,-1, 2,-1, 2},
 		 { 0,  1, 0,-1,  0, 1, 0,-1, 0},
-		 { 0,  0, 1, 0, -1, 0, 1, 0, -1}};
+		 { 0,  0, 1, 0, -1, 0, 1, 0, -1}};*/
+
+  int M[Q][Q]={{1,1,1,1,1,1,1,1,1},                  //version articulo
+	       {-4,-1,-1,-1,-1,2,2,2,2},
+	       {4,-2,-2,-2,-2,1,1,1,1},
+	       {0,1,0,-1,0,1,-1,-1,1},
+	       {0,-2,0,2,0,1,-1,-1,1},
+	       {0,0,1,0,-1,1,1,-1,-1},
+	       {0,0,-2,0,2,1,1,-1,-1},
+	       {0,1,-1,1,-1,0,0,0,0},
+	       {0,0,0,0,0,1,-1,1,-1}};
   
   for(ix=0;ix<Lx;ix++)
     for(iy=0;iy<Ly;iy++){
@@ -183,7 +193,7 @@ void LatticeBoltzmann::Adveccione(void){ //de fnew a f
   int ix,iy,i,j;
   double a=1/9.,b=1/6.,c=1/18.,d=1/36.,e=1/4.,g=1/12.;
 
-  double M1[Q][Q] = {{a,0,0, 0,0,a, -a,0,0},
+  /*double M1[Q][Q] = {{a,0,0, 0,0,a, -a,0,0},    //version presentacion
 		     {a,b,0,-b,0,-c,-d,e,0},
 		     {a,b,b, g,g, d, c,0,e},
 		     {a,0,b, 0,-b,c,d,-e,0},
@@ -191,7 +201,17 @@ void LatticeBoltzmann::Adveccione(void){ //de fnew a f
 		     {a,-b,0,b,0,-c,-d,e,0},
 		     {a,-b,-b,-g,-g,d,c,0,e},
 		     {a,0,-b,0,b,-c,-d,-e,0},
-		     {a,b,-b,g,-g,d,c,0,-e}};		   
+		     {a,b,-b,g,-g,d,c,0,-e}};	*/
+
+  double M1[Q][Q] = {{a,-a, a, 0, 0, 0, 0, 0, 0},  //version articulo
+		     {a,-d,-c, b,-b, 0, 0, e, 0},
+		     {a,-d,-c, 0, 0, b,-b,-e, 0},
+		     {a,-d,-c,-b, b, 0, 0, e, 0},
+		     {a,-d,-c, 0, 0,-b, b,-e, 0},
+		     {a, c, d, b, g, b, g, 0, e},
+		     {a, c, d,-b,-g, b, g, 0,-e},
+		     {a, c, d,-b,-g,-b,-g, 0, e},
+		     {a, c, d, b, g,-b,-g, 0,-e}};
   
   for(ix=0;ix<Lx;ix++)
     for(iy=0;iy<Ly;iy++){
