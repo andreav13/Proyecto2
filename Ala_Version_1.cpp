@@ -28,7 +28,8 @@ private:
   double w[Q];
   int V[2][Q]; //V[alpha][i] alpha=1 es x, alpha=0 es y
   double f[Lx][Ly][Q], fnew[Lx][Ly][Q]; //f[ix][iy][i]
-  double zeta[Lx][Ly][Q], zetanew[Lx][Ly][Q];
+  double zeta[Lx][Ly][Q], deltazeta[Lx][Ly][Q];
+  double S[Q];
   
 public:
   LatticeBoltzmann(void);
@@ -58,7 +59,10 @@ LatticeBoltzmann::LatticeBoltzmann(void){
   V[0][5]=1;  V[0][6]=-1;  V[0][7]=-1;  V[0][8]=1;
   V[1][5]=1;  V[1][6]=1;   V[1][7]=-1;  V[1][8]=-1;
 
- int  M[9][9]={  { 1,  1, 1, 1,  1, 1, 1, 1, 1},
+  S[0]=S[1]=S[2]=0;
+  S[3]=s3; S[4]=s4; S[5]=s5; S[6]=s6; S[7]=S[8]=s7;
+
+ int  M[Q][Q]={  { 1,  1, 1, 1,  1, 1, 1, 1, 1},
 		 { 0,  1, 1, 0, -1,-1,-1, 0, 1},
 		 { 0,  0, 1, 1,  1, 0,-1,-1, -1},
 		 { 0, -2, 1, 0,  1, 2,-1, 0, 1},
@@ -69,7 +73,7 @@ LatticeBoltzmann::LatticeBoltzmann(void){
 		 { 0,  0, 1, 0, -1, 0, 1, 0, -1}};
 
  
-double  S[9][9]={{ 0,  0, 0, 0,  0, 0, 0, 0, 0},
+ /*double  S[9][9]={{ 0,  0, 0, 0,  0, 0, 0, 0, 0},
 		 { 0,  0, 0, 0,  0, 0, 0, 0, 0},
      		 { 0,  0, 0, 0,  0, 0, 0, 0, 0},
 		 { 0,  0, 0,s3,  0, 0, 0, 0, 0},
@@ -78,6 +82,7 @@ double  S[9][9]={{ 0,  0, 0, 0,  0, 0, 0, 0, 0},
 		 { 0,  0, 0, 0,  0, 0,s6, 0, 0},
 		 { 0,  0, 0, 0,  0, 0, 0,s7, 0},
 		 { 0,  0, 0, 0,  0, 0, 0, 0,s7}};
+ */
 /*
  for (int i=0;i<9;i++){
    for(int j=0;j<9;j++){
@@ -86,9 +91,9 @@ double  S[9][9]={{ 0,  0, 0, 0,  0, 0, 0, 0, 0},
    std::cout<<endl;
  }
 */
-
- 
 }
+
+
 /*
 double** S(void){                                         // Intento de una Función para la matriz S, no se como hacer que devuelva la matriz
   double S[9][9]={{ 0,  0, 0, 0,  0, 0, 0, 0, 0},
@@ -142,13 +147,20 @@ double LatticeBoltzmann::Jy(int ix, int iy, bool UseNew){
   return suma;
 }
 
+double LatticeBoltzmann::fequilibrio(int i, double rho0, double Jx0, double Jy0){
+  double U2, UdotVi;
+  U2=Jx0*Jx0+Jy0*Jy0;   UdotVi=Jx0*V[0][i]+Jy0*V[1][i];
+  return w[i]*rho0*(1 + 3*UdotVi + 9/2.*UdotVi*UdotVi - 3/2.*U2);
+  
+}
+
 double LatticeBoltzmann::zetaequilibrio(int i, double rho0, double Jx0, double Jy0){
   
   double qx_eq,qy_eq;
   double energia_eq,energia2_eq,A;
   double pxx_eq,pxy_eq;
 
-  A=3*((Jx0*Jx0*+Jy0*Jy0)/rho0);
+  A=3*((Jx0*Jx0+Jy0*Jy0)/rho0);
   
   qx_eq=-Jx0;                  qy_eq=-Jy0;
   
@@ -157,18 +169,9 @@ double LatticeBoltzmann::zetaequilibrio(int i, double rho0, double Jx0, double J
   pxx_eq= (Jx0*Jx0-Jy0*Jy0)/rho0;
   pxy_eq=Jx0*Jy0/rho0;
 
-  double zeta_eq[9][1]= {{rho0},{Jx0},{Jy0},{qx_eq},{qy_eq},{energia2_eq},{energia_eq},{pxx_eq},{pxy_eq}};
-  return zeta_eq[i][1];
+  double zeta_eq[Q] = {rho0,Jx0,Jy0,qx_eq,qy_eq,energia2_eq,energia_eq,pxx_eq,pxy_eq};
+  return zeta_eq[i];
 
-
-  
-}
-
-double LatticeBoltzmann::fequilibrio(int i, double rho0, double Jx0, double Jy0){
-  double U2, UdotVi;
-  U2=Jx0*Jx0+Jy0*Jy0;   UdotVi=Jx0*V[0][i]+Jy0*V[1][i];
-  return w[i]*rho0*(1 + 3*UdotVi + 9/2.*UdotVi*UdotVi - 3/2.*U2);
-  
 }
 
 void LatticeBoltzmann::Inicie(double rho0, double Jx0, double Jy0){
@@ -204,18 +207,18 @@ void LatticeBoltzmann::Colisione(int t){ //de f a fnew
       ImponerCampos(ix,iy,rho0,Jx0,Jy0,t);
       for(i=0;i<Q;i++){ //para cada direccion
 	fnew[ix][iy][i]=UmUtau*f[ix][iy][i]+Utau*fequilibrio(i,rho0,Jx0,Jy0); //evoluciono
-       	zetanew[ix][iy][i]= S*(zeta[ix][iy][i]+zetaequilibrio(i,rho0,Jx0,Jy0));    //No se como introducir S en esta función.
+       	deltazeta[ix][iy][i]= S[i]*(zeta[ix][iy][i]-zetaequilibrio(i,rho0,Jx0,Jy0));  
       }
     }
 }
-   
+/*
 void LatticeBoltzmann::Adveccione(void){ //de fnew a f
   int ix,iy,i;
   for(ix=0;ix<Lx;ix++)
     for(iy=0;iy<Ly;iy++)
       for(i=0;i<Q;i++)
 	f[(ix+V[0][i]+Lx)%Lx][(iy+V[1][i]+Ly)%Ly][i]=fnew[ix][iy][i];
-  //	f[(ix+V[0][i]+Lx)%Lx][(iy+V[1][i]+Ly)%Ly][i]=(M^⁻1)*zetanew[ix][iy][i];   //No se como introducir M en esta funcion.
+  //	f[(ix+V[0][i]+Lx)%Lx][(iy+V[1][i]+Ly)%Ly][i]=(M^⁻1)*deltazeta[ix][iy][i];   //No se como introducir M en esta funcion.
 }
 
 void LatticeBoltzmann::Imprimase(char const * NombreArchivo, int t){
@@ -229,26 +232,27 @@ void LatticeBoltzmann::Imprimase(char const * NombreArchivo, int t){
     }
   MiArchivo.close();
 }
-
+*/
 
 //-----------------------Funciones Globales-----------------------
 
 
 int main(void){
 
-  LatticeBoltzmann Ang;
+  LatticeBoltzmann Ala;
   int t,tmax=1000;
   
   //Inicie
-  Ang.Inicie(RHOinicial,Uentrada,0);
+  Ala.Inicie(RHOinicial,Uentrada,0);
 
   //Corra
-  for(t=0;t<tmax;t++){
-    Ang.Colisione(t);
-    Ang.Adveccione();
+  /*for(t=0;t<tmax;t++){
+    Ala.Colisione(t);
+    Ala.Adveccione();
   }
   
-  Ang.Imprimase("Ang.dat", t);
+  Ala.Imprimase("Ala.dat", t);*/
+
   
   return 0;
 }
