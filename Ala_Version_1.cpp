@@ -179,20 +179,7 @@ void LatticeBoltzmann::ImponerCampos(int ix, int iy, double & rho0, double & Jx0
 }
 
 void LatticeBoltzmann::Colisione(int t){ //de f a fnew
-  int ix,iy,i; double rho0,Jx0,Jy0;
-  for(ix=0;ix<Lx;ix++)
-    for(iy=0;iy<Ly;iy++){ //para cada celda
-      rho0=rho(ix,iy,false); Jx0=Jx(ix,iy,false); Jy0=Jy(ix,iy,false); //calculo campos
-      ImponerCampos(ix,iy,rho0,Jx0,Jy0,t);
-      for(i=0;i<Q;i++){ //para cada direccion
-	//fnew[ix][iy][i]=UmUtau*f[ix][iy][i]+Utau*fequilibrio(i,rho0,Jx0,Jy0); //evoluciono
-       	deltazeta[ix][iy][i]= S[i]*(zeta[ix][iy][i]-zetaequilibrio(i,rho0,Jx0,Jy0));  
-      }
-    }
-}
-
-void LatticeBoltzmann::Adveccione(void){ //de fnew a f
-  int ix,iy,i,j;
+  int ix,iy,i,j; double rho0,Jx0,Jy0;
   double a=1/9.,b=1/6.,c=1/18.,d=1/36.,e=1/4.,g=1/12.;
 
   /*double M1[Q][Q] = {{a,0,0, 0,0,a, -a,0,0},    //version presentacion
@@ -214,9 +201,15 @@ void LatticeBoltzmann::Adveccione(void){ //de fnew a f
 		     {a, c, d,-b,-g, b, g, 0,-e},
 		     {a, c, d,-b,-g,-b,-g, 0, e},
 		     {a, c, d, b, g,-b,-g, 0,-e}};
-  
+
   for(ix=0;ix<Lx;ix++)
-    for(iy=0;iy<Ly;iy++){
+    for(iy=0;iy<Ly;iy++){ //para cada celda      
+      
+      rho0=rho(ix,iy,false); Jx0=Jx(ix,iy,false); Jy0=Jy(ix,iy,false); //calculo campos
+      ImponerCampos(ix,iy,rho0,Jx0,Jy0,t);
+      for(i=0;i<Q;i++){
+	deltazeta[ix][iy][i]= S[i]*(zeta[ix][iy][i]-zetaequilibrio(i,rho0,Jx0,Jy0));  
+      }
 
       for(i=0;i<Q;i++){
 	M1porDeltazeta[i]=0;
@@ -225,9 +218,16 @@ void LatticeBoltzmann::Adveccione(void){ //de fnew a f
       }
       
       for(i=0;i<Q;i++)
-  	f[(ix+V[0][i]+Lx)%Lx][(iy+V[1][i]+Ly)%Ly][i]=f[ix][iy][i]+M1porDeltazeta[i];
-      //f[(ix+V[0][i]+Lx)%Lx][(iy+V[1][i]+Ly)%Ly][i]=fnew[ix][iy][i];
-    }
+	fnew[ix][iy][i]=f[ix][iy][i]+M1porDeltazeta[i]; //evoluciono
+    }  
+}
+
+void LatticeBoltzmann::Adveccione(void){ //de fnew a f
+  int ix,iy,i;
+  for(ix=0;ix<Lx;ix++)
+    for(iy=0;iy<Ly;iy++)
+      for(i=0;i<Q;i++)
+	f[(ix+V[0][i]+Lx)%Lx][(iy+V[1][i]+Ly)%Ly][i]=fnew[ix][iy][i];
 }
 
 void LatticeBoltzmann::Imprimase(char const * NombreArchivo, int t){
