@@ -61,7 +61,7 @@ LatticeBoltzmann::LatticeBoltzmann(void){
   V[1][5]=1;  V[1][6]=1;   V[1][7]=-1;  V[1][8]=-1;
 
   S[0]=S[1]=S[2]=0;
-  S[3]=s3; S[4]=s4; S[5]=s5; S[6]=s6; S[7]=S[8]=s7;
+  S[3]=-s3; S[4]=-s4; S[5]=-s5; S[6]=-s6; S[7]=S[8]=-s7;
 }
 
 double LatticeBoltzmann::rho(int ix, int iy, bool UseNew){
@@ -147,17 +147,19 @@ void LatticeBoltzmann::Inicie(double rho0, double Jx0, double Jy0){
   for(ix=0;ix<Lx;ix++)
     for(iy=0;iy<Ly;iy++){
 
+      for(i=0;i<Q;i++)
+	f[ix][iy][i]=fequilibrio(i,rho0,Jx0,Jy0);
+      //zeta[ix][iy][i]=zetaequilibrio(i,rho0,Jx0,Jy0);
+      
       for(i=0;i<Q;i++){
 	MporF[i]=0;
 	for(j=0;j<Q;j++)
 	  MporF[i]+=M[i][j]*f[ix][iy][j];
       }
       
-      for(i=0;i<Q;i++){
-	f[ix][iy][i]=fequilibrio(i,rho0,Jx0,Jy0);
-	//zeta[ix][iy][i]=zetaequilibrio(i,rho0,Jx0,Jy0);
+      for(i=0;i<Q;i++)
 	zeta[ix][iy][i]=MporF[i];
-      }
+      
     }
 }
 
@@ -171,7 +173,7 @@ void LatticeBoltzmann::ImponerCampos(int ix, int iy, double & rho0, double & Jx0
     Jx0=Jy0=0;
   //El ventilador
   if(ix==0){
-    Jx0=Uentrada;
+    Jx0=Uentrada*RHOinicial;
     Jy0=0;
   }
 }
@@ -224,7 +226,7 @@ void LatticeBoltzmann::Adveccione(void){ //de fnew a f
       
       for(i=0;i<Q;i++)
   	f[(ix+V[0][i]+Lx)%Lx][(iy+V[1][i]+Ly)%Ly][i]=f[ix][iy][i]+M1porDeltazeta[i];
-        //f[(ix+V[0][i]+Lx)%Lx][(iy+V[1][i]+Ly)%Ly][i]=fnew[ix][iy][i];
+      //f[(ix+V[0][i]+Lx)%Lx][(iy+V[1][i]+Ly)%Ly][i]=fnew[ix][iy][i];
     }
 }
 
@@ -235,7 +237,9 @@ void LatticeBoltzmann::Imprimase(char const * NombreArchivo, int t){
     for(int iy=0;iy<Ly;iy+=4){
       rho0=rho(ix,iy,true); Jx0=Jx(ix,iy,true); Jy0=Jy(ix,iy,true);
       ImponerCampos(ix,iy,rho0,Jx0,Jy0,t);
-      MiArchivo<<ix<<" "<<iy<<" "<<4.0/Uentrada*Jx0<<" "<<4.0/Uentrada*Jy0<<endl;
+      // MiArchivo<<ix<<" "<<iy<<" "<<4.0/Uentrada*Jx0/rho0<<" "<<4.0/Uentrada*Jy0/rho0<<endl;
+      //MiArchivo<<ix<<" "<<iy<<" "<<rho0<<endl;
+      MiArchivo<<ix<<" "<<iy<<" "<<Jx0<<" "<<Jy0<<endl;
     }
   MiArchivo.close();
 }
@@ -255,7 +259,7 @@ int main(void){
   //Corra
   for(t=0;t<tmax;t++){
     Ala.Colisione(t);
-    //Ala.Adveccione();
+    Ala.Adveccione();
   }
   
   Ala.Imprimase("Ala.dat", t);
