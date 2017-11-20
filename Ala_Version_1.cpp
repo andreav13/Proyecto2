@@ -30,7 +30,7 @@ private:
   double f[Lx][Ly][Q], fnew[Lx][Ly][Q]; //f[ix][iy][i]
   double zeta[Lx][Ly][Q], deltazeta[Lx][Ly][Q];
   double S[Q];
-  double MporF[Q], M1porDeltazeta[Q];
+  double MporF[Q], MporFnew[Q],  M1porDeltazeta[Q];
   
 public:
   LatticeBoltzmann(void);
@@ -218,18 +218,52 @@ void LatticeBoltzmann::Colisione(int t){ //de f a fnew
       }
       
       for(i=0;i<Q;i++)
-	//fnew[ix][iy][i]=f[ix][iy][i]+M1porDeltazeta[i]; //evoluciono
 	fnew[ix][iy][i]=UmUtau*f[ix][iy][i]+Utau*fequilibrio(i,rho0,Jx0,Jy0);
+      //fnew[ix][iy][i]=f[ix][iy][i]+M1porDeltazeta[i]; //evoluciono
 	
     }  
 }
 
 void LatticeBoltzmann::Adveccione(void){ //de fnew a f
-  int ix,iy,i;
+  int ix,iy,i,j;
+
+  /*int M[Q][Q]={  { 1,  1, 1, 1,  1, 1, 1, 1, 1},   //version presentacion
+		 { 0,  1, 1, 0, -1,-1,-1, 0, 1},
+		 { 0,  0, 1, 1,  1, 0,-1,-1, -1},
+		 { 0, -2, 1, 0,  1, 2,-1, 0, 1},
+		 { 0,  0, 1,-2,  1, 0,-1, 2, -1},
+		 { 4, -2, 1,-2,  1,-2, 1,-2, 1},
+		 {-4, -1, 2,-1,  2,-1, 2,-1, 2},
+		 { 0,  1, 0,-1,  0, 1, 0,-1, 0},
+		 { 0,  0, 1, 0, -1, 0, 1, 0, -1}};*/
+
+  int M[Q][Q]={{1,1,1,1,1,1,1,1,1},                  //version articulo
+	       {-4,-1,-1,-1,-1,2,2,2,2},
+	       {4,-2,-2,-2,-2,1,1,1,1},
+	       {0,1,0,-1,0,1,-1,-1,1},
+	       {0,-2,0,2,0,1,-1,-1,1},
+	       {0,0,1,0,-1,1,1,-1,-1},
+	       {0,0,-2,0,2,1,1,-1,-1},
+	       {0,1,-1,1,-1,0,0,0,0},
+	       {0,0,0,0,0,1,-1,1,-1}};
+  
+ 
   for(ix=0;ix<Lx;ix++)
-    for(iy=0;iy<Ly;iy++)
+    for(iy=0;iy<Ly;iy++){
+      
       for(i=0;i<Q;i++)
 	f[(ix+V[0][i]+Lx)%Lx][(iy+V[1][i]+Ly)%Ly][i]=fnew[ix][iy][i];
+      
+      for(i=0;i<Q;i++){
+	MporFnew[i]=0;
+	for(j=0;j<Q;j++)
+	  MporFnew[i]+=M[i][j]*fnew[ix][iy][j];
+      }
+      
+      for(i=0;i<Q;i++)
+	zeta[(ix+V[0][i]+Lx)%Lx][(iy+V[1][i]+Ly)%Ly][i]=MporFnew[i];
+      
+    }
 }
 
 void LatticeBoltzmann::Imprimase(char const * NombreArchivo, int t){
