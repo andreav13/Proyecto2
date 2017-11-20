@@ -96,7 +96,7 @@ double LatticeBoltzmann::Jy(int ix, int iy, bool UseNew){
 
 double LatticeBoltzmann::fequilibrio(int i, double rho0, double Jx0, double Jy0){
   double U2, UdotVi;
-  U2=Jx0*Jx0+Jy0*Jy0;   UdotVi=Jx0*V[0][i]+Jy0*V[1][i];
+  U2=(Jx0*Jx0+Jy0*Jy0)/rho0;   UdotVi=(Jx0*V[0][i]+Jy0*V[1][i])/rho0;
   return w[i]*rho0*(1 + 3*UdotVi + 9/2.*UdotVi*UdotVi - 3/2.*U2);
   
 }
@@ -218,7 +218,9 @@ void LatticeBoltzmann::Colisione(int t){ //de f a fnew
       }
       
       for(i=0;i<Q;i++)
-	fnew[ix][iy][i]=f[ix][iy][i]+M1porDeltazeta[i]; //evoluciono
+	//fnew[ix][iy][i]=f[ix][iy][i]+M1porDeltazeta[i]; //evoluciono
+	fnew[ix][iy][i]=UmUtau*f[ix][iy][i]+Utau*fequilibrio(i,rho0,Jx0,Jy0);
+	
     }  
 }
 
@@ -237,9 +239,8 @@ void LatticeBoltzmann::Imprimase(char const * NombreArchivo, int t){
     for(int iy=0;iy<Ly;iy+=4){
       rho0=rho(ix,iy,true); Jx0=Jx(ix,iy,true); Jy0=Jy(ix,iy,true);
       ImponerCampos(ix,iy,rho0,Jx0,Jy0,t);
-      // MiArchivo<<ix<<" "<<iy<<" "<<4.0/Uentrada*Jx0/rho0<<" "<<4.0/Uentrada*Jy0/rho0<<endl;
-      //MiArchivo<<ix<<" "<<iy<<" "<<rho0<<endl;
-      MiArchivo<<ix<<" "<<iy<<" "<<Jx0<<" "<<Jy0<<endl;
+      MiArchivo<<ix<<" "<<iy<<" "<<4.0/Uentrada*Jx0/rho0<<" "<<4.0/Uentrada*Jy0/rho0<<endl;
+      //MiArchivo<<ix<<" "<<iy<<" "<<Jx0<<" "<<Jy0<<endl;
     }
   MiArchivo.close();
 }
