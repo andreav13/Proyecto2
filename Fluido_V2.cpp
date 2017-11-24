@@ -133,8 +133,8 @@ void LatticeBoltzmann::Adveccione(void){ //de fnew a f
 void LatticeBoltzmann::Imprimase(char const * NombreArchivo, int t){
   double rho0,Ux0,Uy0;
   ofstream MiArchivo(NombreArchivo); 
-  for(int ix=0;ix<Lx;ix+=2)
-    for(int iy=0;iy<Ly;iy+=2){
+  for(int ix=0;ix<Lx;ix+=1)
+    for(int iy=0;iy<Ly;iy+=1){
       rho0=rho(ix,iy,true); Ux0=Ux(ix,iy,true); Uy0=Uy(ix,iy,true);
       ImponerCampos(ix,iy,rho0,Ux0,Uy0,t);
       MiArchivo<<ix<<" "<<iy<<" "<<4.0/Uentrada*Ux0<<" "<<4.0/Uentrada*Uy0<<endl;
