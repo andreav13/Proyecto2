@@ -5,8 +5,8 @@
 
 using namespace std;
 
-const int Lx=260;
-const int Ly=64;
+const int Lx=10;
+const int Ly=6;
 const int Q=9;
 const double W0=4/9.;
 
@@ -43,6 +43,8 @@ public:
   void ImponerCampos(int ix, int iy, double & rho0, double & Jx0, double & Jy0, int t);
   void Colisione(int t);
   void Adveccione(void);
+  double GetF(int ix,int iy, int i){return f[ix][iy][i];};
+  double GetZ(int ix,int iy, int i){return zeta[ix][iy][i];};
   void Imprimase(char const * NombreArchivo, int t);
 };
 
@@ -180,9 +182,11 @@ void LatticeBoltzmann::ImponerCampos(int ix, int iy, double & rho0, double & Jx0
   //El obstaculo
 
   if(ix==0){Jx0=Jy0=0;}
-  if(ix==Lx-1){Jx0=Jy0=0;}
-  if(iy==0){Jx0=Jy0=0;}
   if(iy==Ly-1){Jx0=Uentrada*RHOinicial; Jy0=0;}
+  if(iy==0){Jx0=Jy0=0;}
+  if(ix==Lx-1){Jx0=Jy0=0;}
+  else{Jx0=Jy0=0;}
+  
 }
 
 void LatticeBoltzmann::Colisione(int t){ //de f a fnew
@@ -302,14 +306,39 @@ int main(void){
   
   //Inicie
   Ala.Inicie(RHOinicial,Uentrada,0);
+  /*
+   for (int ix=0;ix<Lx;ix++)
+    {
+      for(int iy=0;iy<Ly;iy++)
+	{
+	  for(int i=0;i<Q;i++){cout<<ix<<"\t "<<iy<<"\t "<<i<<"\t"<<Ala.GetZ(ix,iy,i)<<"\t"<<Ala.GetF(ix,iy,i)<<endl;}
+	}
+    }
+  */
 
+
+  
   //Corra
   for(t=0;t<tmax;t++){
+    for (int ix=0;ix<Lx;ix++)
+      {
+	for(int iy=0;iy<Ly;iy++)
+	  {
+	    double Rho0=Ala.rho(ix,iy,false);
+	    double Jx0=Ala.Jx(ix,iy,false);
+	    double Jy0=Ala.Jy(ix,iy,false);
+	    Ala.ImponerCampos(ix,iy,Rho0,Jx0,Jy0,t);
+	    cout<<ix<<"\t"<<iy<<"\t"<<Rho0<<"\t"<<Jx0<<"\t"<<Jy0<<endl;
+	  }
+      }
+    cout<<"--------------------Nuevo tiempo = "<<t+1<<" ---------------------------------------"<<endl;
+
     Ala.Colisione(t);
     Ala.Adveccione();
   }
   
-  Ala.Imprimase("Ala.dat", t);
+  //  Ala.Imprimase("Ala.dat", t);
+  
 
   
   return 0;
