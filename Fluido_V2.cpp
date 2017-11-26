@@ -159,17 +159,15 @@ int main(void){
   //Corra
   for(t=0;t<tmax;t++){
     
-    for (int ix=0;ix<Lx;ix++)
-      {
-	for(int iy=0;iy<Ly;iy++)
-	  {
-	    double Rho0=Ang.rho(ix,iy,false);
-	    double Ux0=Ang.Ux(ix,iy,false);
-	    double Uy0=Ang.Uy(ix,iy,false);
-	    Ang.ImponerCampos(ix,iy,Rho0,Ux0,Uy0,t);
-	    cout<<ix<<"\t "<<iy<<"\t "<<Rho0<<"\t "<<Ux0<<"\t"<<Uy0<<endl;
-	  }
+    for (int ix=0;ix<Lx;ix++){
+      for(int iy=0;iy<Ly;iy++){
+	double Rho0=Ang.rho(ix,iy,false);
+	double Ux0=Ang.Ux(ix,iy,false);
+	double Uy0=Ang.Uy(ix,iy,false);
+	Ang.ImponerCampos(ix,iy,Rho0,Ux0,Uy0,t);
+	cout<<ix<<"\t "<<iy<<"\t "<<Rho0<<"\t "<<Ux0<<"\t"<<Uy0<<endl;
       }
+    }
     cout<<"--------------------Nuevo tiempo = "<<t<<" ---------------------------------------"<<endl;
     
     Ang.Colisione(t);
