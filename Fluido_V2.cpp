@@ -105,7 +105,7 @@ void LatticeBoltzmann::ImponerCampos(int ix, int iy, double & rho0, double & Ux0
   // Ux0=Uy0=0;
 
   if(iy==0){Ux0=Uy0=0;}
-  if(iy==Ly-1){Ux0=Uentrada, Uy0=0;}
+  if(iy==Ly-1){Ux0=Uentrada; Uy0=0;}
   if(ix==0){Ux0=Uy0=0;}
   if(ix==Lx-1){Ux0=Uy0=0;}
   else{Ux0=Uy0=0;}
