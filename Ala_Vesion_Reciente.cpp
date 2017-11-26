@@ -128,26 +128,6 @@ void LatticeBoltzmann::Inicie(double rho0, double Jx0, double Jy0){
   int ix,iy,i,j;
   double a=1/9.,b=1/6.,c=1/18.,d=1/36.,e=1/4.,g=1/12.;
 
-  /*int M[Q][Q]={  { 1,  1, 1, 1,  1, 1, 1, 1, 1},   //version presentacion
-		 { 0,  1, 1, 0, -1,-1,-1, 0, 1},
-		 { 0,  0, 1, 1,  1, 0,-1,-1, -1},
-		 { 0, -2, 1, 0, -1, 2,-1, 0, 1},
-		 { 0,  0, 1,-2,  1, 0,-1, 2, -1},
-		 { 4, -2, 1,-2,  1,-2, 1,-2, 1},
-		 {-4, -1, 2,-1,  2,-1, 2,-1, 2},
-		 { 0,  1, 0,-1,  0, 1, 0,-1, 0},
-		 { 0,  0, 1, 0, -1, 0, 1, 0, -1}};*/
-
-  /*  int M[Q][Q]={{1,1,1,1,1,1,1,1,1},                  //version articulo
-	       {-4,-1,-1,-1,-1,2,2,2,2},
-	       {4,-2,-2,-2,-2,1,1,1,1},
-	       {0,1,0,-1,0,1,-1,-1,1},
-	       {0,-2,0,2,0,1,-1,-1,1},
-	       {0,0,1,0,-1,1,1,-1,-1},
-	       {0,0,-2,0,2,1,1,-1,-1},
-	       {0,1,-1,1,-1,0,0,0,0},
-	       {0,0,0,0,0,1,-1,1,-1}};*/
-
   double M1[Q][Q] = {{a,0,0, 0,0,a, -a,0,0},    //version presentacion
 		     {a,b,0,-b,0,-c,-d,e,0},
 		     {a,b,b, g,g, d, c,0,e},
@@ -174,21 +154,18 @@ void LatticeBoltzmann::Inicie(double rho0, double Jx0, double Jy0){
     for(iy=0;iy<Ly;iy++){
       for(i=0;i<Q;i++){
 	zeta[ix][iy][i]=zetaequilibrio(i,rho0,Jx0,Jy0);
-	f[ix][iy][i]=fequilibrio(i,rho0,Jx0,Jy0);
+	//f[ix][iy][i]=fequilibrio(i,rho0,Jx0,Jy0);
       }
       
       for(i=0;i<Q;i++){
 	M1porZeta[i]=0;
-	//MporF[i]=0;
 	for(j=0;j<Q;j++){
 	  M1porZeta[i]+=M1[i][j]*zeta[ix][iy][j];
-	  //MporF[i]+=M[i][j]*f[ix][iy][j];
 	}
       }
       
       for(i=0;i<Q;i++){
-	//f[ix][iy][i]=M1porZeta[i];
-	//zeta[ix][iy][i]=MporF[i];
+	f[ix][iy][i]=M1porZeta[i];
       }
       
     }
@@ -198,13 +175,13 @@ void LatticeBoltzmann::Inicie(double rho0, double Jx0, double Jy0){
 void LatticeBoltzmann::ImponerCampos(int ix, int iy, double & rho0, double & Jx0, double & Jy0, int t){
   double ixc=Lx/8, iyc=Ly/2, R=Ly/5, R2=R*R;
   //El obstaculo
-  if((ix-ixc)*(ix-ixc) + (iy-iyc)*(iy-iyc) <= R2)
+  //if((ix-ixc)*(ix-ixc) + (iy-iyc)*(iy-iyc) <= R2)
     Jx0=Jy0=0;
   //El ventilador
-  if(ix==0){
+  /*if(ix==0){
     Jx0=Uentrada*RHOinicial;
     Jy0=0;
-  }  
+    }  */
 }
 
 void LatticeBoltzmann::Colisione(int t){ //de f a fnew
@@ -250,8 +227,8 @@ void LatticeBoltzmann::Colisione(int t){ //de f a fnew
       }
       
       for(i=0;i<Q;i++)
-	fnew[ix][iy][i]=UmUtau*f[ix][iy][i]+Utau*fequilibrio(i,rho0,Jx0,Jy0);
-      //fnew[ix][iy][i]=f[ix][iy][i]+M1porDeltazeta[i]; //evoluciono
+	//fnew[ix][iy][i]=UmUtau*f[ix][iy][i]+Utau*fequilibrio(i,rho0,Jx0,Jy0);
+	fnew[ix][iy][i]=f[ix][iy][i]+M1porDeltazeta[i]; //evoluciono
       
     }
   
@@ -342,7 +319,7 @@ int main(void){
 	cout<<ix<<"\t"<<iy<<"\t"<<Rho0<<"\t"<<Ux0<<"\t"<<Uy0<<endl;
       }
     }
-    cout<<"--------------------Nuevo tiempo = "<<t<<" ---------------------------------------"<<endl;     */ 
+    cout<<"--------------------Nuevo tiempo = "<<t<<" ---------------------------------------"<<endl;      */
     
     Ala.Colisione(t);
     Ala.Adveccione();
