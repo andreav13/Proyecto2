@@ -336,9 +336,9 @@ int main(void){
 	double Rho0=Ala.rho(ix,iy,false);
 	double Jx0=Ala.Jx(ix,iy,false);
 	double Jy0=Ala.Jy(ix,iy,false);
+	Ala.ImponerCampos(ix,iy,Rho0,Jx0,Jy0,t);
 	double Ux0=Jx0/Rho0;
 	double Uy0=Jy0/Rho0;
-	Ala.ImponerCampos(ix,iy,Rho0,Jx0,Jy0,t);
 	cout<<ix<<"\t"<<iy<<"\t"<<Rho0<<"\t"<<Ux0<<"\t"<<Uy0<<endl;
       }
     }
