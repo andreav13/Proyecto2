@@ -5,8 +5,8 @@
 
 using namespace std;
 
-const int Lx=10;
-const int Ly=6;
+const int Lx=260;
+const int Ly=64;
 const int Q=9;
 const double W0=4/9.;
 
@@ -174,7 +174,7 @@ void LatticeBoltzmann::Inicie(double rho0, double Jx0, double Jy0){
     for(iy=0;iy<Ly;iy++){
       for(i=0;i<Q;i++){
 	zeta[ix][iy][i]=zetaequilibrio(i,rho0,Jx0,Jy0);
-	//f[ix][iy][i]=fequilibrio(i,rho0,Jx0,Jy0);
+	f[ix][iy][i]=fequilibrio(i,rho0,Jx0,Jy0);
       }
       
       for(i=0;i<Q;i++){
@@ -187,7 +187,7 @@ void LatticeBoltzmann::Inicie(double rho0, double Jx0, double Jy0){
       }
       
       for(i=0;i<Q;i++){
-	f[ix][iy][i]=M1porZeta[i];
+	//f[ix][iy][i]=M1porZeta[i];
 	//zeta[ix][iy][i]=MporF[i];
       }
       
@@ -198,13 +198,13 @@ void LatticeBoltzmann::Inicie(double rho0, double Jx0, double Jy0){
 void LatticeBoltzmann::ImponerCampos(int ix, int iy, double & rho0, double & Jx0, double & Jy0, int t){
   double ixc=Lx/8, iyc=Ly/2, R=Ly/5, R2=R*R;
   //El obstaculo
-
-  if(ix==0){Jx0=Jy0=0;}
-  if(iy==Ly-1){Jx0=Uentrada*RHOinicial; Jy0=0;}
-  if(iy==0){Jx0=Jy0=0;}
-  if(ix==Lx-1){Jx0=Jy0=0;}
-  else{Jx0=Jy0=0;}
-  
+  if((ix-ixc)*(ix-ixc) + (iy-iyc)*(iy-iyc) <= R2)
+    Jx0=Jy0=0;
+  //El ventilador
+  if(ix==0){
+    Jx0=Uentrada*RHOinicial;
+    Jy0=0;
+  }  
 }
 
 void LatticeBoltzmann::Colisione(int t){ //de f a fnew
@@ -250,8 +250,8 @@ void LatticeBoltzmann::Colisione(int t){ //de f a fnew
       }
       
       for(i=0;i<Q;i++)
-	//fnew[ix][iy][i]=UmUtau*f[ix][iy][i]+Utau*fequilibrio(i,rho0,Jx0,Jy0);
-	fnew[ix][iy][i]=f[ix][iy][i]+M1porDeltazeta[i]; //evoluciono
+	fnew[ix][iy][i]=UmUtau*f[ix][iy][i]+Utau*fequilibrio(i,rho0,Jx0,Jy0);
+      //fnew[ix][iy][i]=f[ix][iy][i]+M1porDeltazeta[i]; //evoluciono
       
     }
   
@@ -306,8 +306,8 @@ void LatticeBoltzmann::Adveccione(void){ //de fnew a f
 void LatticeBoltzmann::Imprimase(char const * NombreArchivo, int t){
   double rho0,Jx0,Jy0;
   ofstream MiArchivo(NombreArchivo); 
-  for(int ix=0;ix<Lx;ix+=1)
-    for(int iy=0;iy<Ly;iy+=1){
+  for(int ix=0;ix<Lx;ix+=4)
+    for(int iy=0;iy<Ly;iy+=4){
       rho0=rho(ix,iy,true); Jx0=Jx(ix,iy,true); Jy0=Jy(ix,iy,true);
       ImponerCampos(ix,iy,rho0,Jx0,Jy0,t);
       MiArchivo<<ix<<" "<<iy<<" "<<4.0/Uentrada*Jx0/rho0<<" "<<4.0/Uentrada*Jy0/rho0<<endl;
@@ -331,24 +331,24 @@ int main(void){
   //Corra
   for(t=0;t<tmax;t++){
     
-    for (int ix=0;ix<Lx;ix++){
+    /*for (int ix=0;ix<Lx;ix++){
       for(int iy=0;iy<Ly;iy++){
 	double Rho0=Ala.rho(ix,iy,false);
-	double Jx0=Ala.Jx(ix,iy,false);
-	double Jy0=Ala.Jy(ix,iy,false);
-	Ala.ImponerCampos(ix,iy,Rho0,Jx0,Jy0,t);
-	double Ux0=Jx0/Rho0;
+	  double Jx0=Ala.Jx(ix,iy,false);
+	  double Jy0=Ala.Jy(ix,iy,false);
+	  Ala.ImponerCampos(ix,iy,Rho0,Jx0,Jy0,t);
+	  double Ux0=Jx0/Rho0;
 	double Uy0=Jy0/Rho0;
 	cout<<ix<<"\t"<<iy<<"\t"<<Rho0<<"\t"<<Ux0<<"\t"<<Uy0<<endl;
       }
     }
-    cout<<"--------------------Nuevo tiempo = "<<t<<" ---------------------------------------"<<endl;      
+    cout<<"--------------------Nuevo tiempo = "<<t<<" ---------------------------------------"<<endl;     */ 
     
     Ala.Colisione(t);
     Ala.Adveccione();
   }
   
-  //  Ala.Imprimase("Ala.dat", t);
+  Ala.Imprimase("Ala.dat", t);
   
   
   return 0;
