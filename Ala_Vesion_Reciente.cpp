@@ -174,7 +174,7 @@ void LatticeBoltzmann::Inicie(double rho0, double Jx0, double Jy0){
     for(iy=0;iy<Ly;iy++){
       for(i=0;i<Q;i++){
 	zeta[ix][iy][i]=zetaequilibrio(i,rho0,Jx0,Jy0);
-	f[ix][iy][i]=fequilibrio(i,rho0,Jx0,Jy0);
+	//f[ix][iy][i]=fequilibrio(i,rho0,Jx0,Jy0);
       }
       
       for(i=0;i<Q;i++){
@@ -187,7 +187,7 @@ void LatticeBoltzmann::Inicie(double rho0, double Jx0, double Jy0){
       }
       
       for(i=0;i<Q;i++){
-	//f[ix][iy][i]=M1porZeta[i];
+	f[ix][iy][i]=M1porZeta[i];
 	//zeta[ix][iy][i]=MporF[i];
       }
       
@@ -250,8 +250,8 @@ void LatticeBoltzmann::Colisione(int t){ //de f a fnew
       }
       
       for(i=0;i<Q;i++)
-	fnew[ix][iy][i]=UmUtau*f[ix][iy][i]+Utau*fequilibrio(i,rho0,Jx0,Jy0);
-      //fnew[ix][iy][i]=f[ix][iy][i]+M1porDeltazeta[i]; //evoluciono
+	//fnew[ix][iy][i]=UmUtau*f[ix][iy][i]+Utau*fequilibrio(i,rho0,Jx0,Jy0);
+	fnew[ix][iy][i]=f[ix][iy][i]+M1porDeltazeta[i]; //evoluciono
       
     }
   
@@ -290,14 +290,14 @@ void LatticeBoltzmann::Adveccione(void){ //de fnew a f
       
       
       for(i=0;i<Q;i++){
-	MporF[i]=0;
+	MporFnew[i]=0;
 	for(j=0;j<Q;j++){
-	  MporF[i]+=M[i][j]*f[ix][iy][j];
+	  MporFnew[i]+=M[i][j]*fnew[ix][iy][j];
 	}
       }
       
       for(i=0;i<Q;i++)
-	zeta[(ix+V[0][i]+Lx)%Lx][(iy+V[1][i]+Ly)%Ly][i]=MporF[i];
+	zeta[(ix+V[0][i]+Lx)%Lx][(iy+V[1][i]+Ly)%Ly][i]=MporFnew[i];
       
     }
   }
